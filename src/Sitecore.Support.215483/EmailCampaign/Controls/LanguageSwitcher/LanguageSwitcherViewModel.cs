@@ -1,18 +1,17 @@
-﻿using Sitecore.Diagnostics;
-using Sitecore.EmailCampaign.Controls;
-using Sitecore.Modules.EmailCampaign;
-using Sitecore.Modules.EmailCampaign.Messages;
-using Sitecore.Modules.EmailCampaign.Messages.Interfaces;
-using Sitecore.Mvc.Presentation;
-using Sitecore.Security.AccessControl;
-using Sitecore.Web.UI.Controls.Common.UserControls;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace Sitecore.Support.EmailCampaign.Controls.LanguageSwitcher
+﻿namespace Sitecore.Support.EmailCampaign.Controls.LanguageSwitcher
 {
+    using Sitecore.Diagnostics;
+    using Sitecore.EmailCampaign.Controls;
+    using Sitecore.Modules.EmailCampaign;
+    using Sitecore.Modules.EmailCampaign.Messages;
+    using Sitecore.Modules.EmailCampaign.Messages.Interfaces;
+    using Sitecore.Mvc.Presentation;
+    using Sitecore.Security.AccessControl;
+    using Sitecore.Web.UI.Controls.Common.UserControls;
+    using System;
+    using System.Linq;
+    using System.Web;
+
     public class LanguageSwitcherViewModel : Sitecore.EmailCampaign.Controls.LanguageSwitcher.LanguageSwitcherViewModel
     {
 

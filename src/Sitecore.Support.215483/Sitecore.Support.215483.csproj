@@ -73,7 +73,7 @@
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LanguageSwitcherViewModel.cs" />
+    <Compile Include="EmailCampaign\Controls\LanguageSwitcher\LanguageSwitcherViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
