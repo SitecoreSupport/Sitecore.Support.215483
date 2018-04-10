@@ -4,6 +4,7 @@ using Sitecore.Modules.EmailCampaign;
 using Sitecore.Modules.EmailCampaign.Messages;
 using Sitecore.Modules.EmailCampaign.Messages.Interfaces;
 using Sitecore.Mvc.Presentation;
+using Sitecore.Security.AccessControl;
 using Sitecore.Web.UI.Controls.Common.UserControls;
 using System;
 using System.Collections.Generic;
@@ -115,7 +116,9 @@ namespace Sitecore.Support.EmailCampaign.Controls.LanguageSwitcher
         {
             var allLanguages = new Util().GetDb().Languages;
 
-            this.FormattedLanguages = allLanguages.Select(l =>
+            this.FormattedLanguages = allLanguages
+                .Where(l => new Util().GetDb().GetItem(l.Origin.ItemId) != null && AuthorizationManager.IsAllowed(new Util().GetDb().GetItem(l.Origin.ItemId), AccessRight.LanguageRead, Context.User))
+                .Select(l =>
             {
                 var messageLangauge = this.MessageLanguages.FirstOrDefault(messageLang => messageLang.IsoCode == l.Name);
 
