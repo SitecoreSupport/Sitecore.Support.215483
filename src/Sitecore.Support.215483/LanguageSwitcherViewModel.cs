@@ -154,6 +154,10 @@ namespace Sitecore.Support.EmailCampaign.Controls.LanguageSwitcher
             UserControl.Requires.Css("ecm", "LanguageSwitcher.css");
             UserControl.Class = "sc-ecm-language sc-actionpanel";
             UserControl.Attributes["data-bind"] = "visible: isVisible, isOpen: false";
+
+            typeof(Sitecore.EmailCampaign.Controls.LanguageSwitcher.LanguageSwitcherViewModel)
+                .GetMethod("set_UserControl", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(this, new object[] { UserControl });
         }
     }
 }
