@@ -87,12 +87,19 @@ namespace Sitecore.Support.EmailCampaign.Controls.LanguageSwitcher
             }
             this.MessageLanguages = languageRepository.GetLanguages(messageId, contentLanguage);
 
-            this.CurrentLanguageToolTip = string.Empty;
-            
-            this.CurrentLanguage = this.MessageLanguages.SingleOrDefault(x => x.IsDefault);
+            typeof(Sitecore.EmailCampaign.Controls.LanguageSwitcher.LanguageSwitcherViewModel)
+                .GetMethod("set_CurrentLanguageToolTip", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(this, new object[] { string.Empty });
+
+            typeof(Sitecore.EmailCampaign.Controls.LanguageSwitcher.LanguageSwitcherViewModel)
+                .GetMethod("set_CurrentLanguage", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(this, new object[] { this.MessageLanguages.SingleOrDefault(x => x.IsDefault) });
+
             if (this.CurrentLanguage != null)
             {
-                this.CurrentLanguageToolTip = this.CurrentLanguage.DisplayName;
+                typeof(Sitecore.EmailCampaign.Controls.LanguageSwitcher.LanguageSwitcherViewModel)
+                .GetMethod("set_CurrentLanguageToolTip", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(this, new object[] { this.CurrentLanguage.DisplayName });
                 this.UserControl.Attributes.Add("data-sc-defaultLanguage", this.CurrentLanguage.IsoCode);
                 this.UserControl.Attributes.Add("data-sc-defaultLanguageToolTip", this.CurrentLanguageToolTip);
 
