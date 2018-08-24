@@ -9,6 +9,7 @@
     using Sitecore.Modules.EmailCampaign.Messages.Interfaces;
     using Sitecore.Modules.EmailCampaign.Services;
     using Sitecore.Mvc.Presentation;
+    using Sitecore.Security.AccessControl;
     using Sitecore.Web.UI.Controls.Common.UserControls;
     using System;
     using System.Linq;
@@ -28,8 +29,7 @@
             : this(ServiceProviderServiceExtensions.GetService<IExmCampaignService>(ServiceLocator.ServiceProvider), ServiceProviderServiceExtensions.GetService<ILanguageRepository>(ServiceLocator.ServiceProvider), new SitecoreViewModelHelper())
         {
         }
-
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="LanguageSwitcherViewModel"/> class 
         /// </summary>
@@ -61,7 +61,6 @@
             this._sitecoreViewModelHelper.MessageDoesNotExistRedirect(messageId);
         }
 
-
         private void GetCurrentLanguage()
         {
             var messageId = _sitecoreViewModelHelper.MessageId;
@@ -79,14 +78,22 @@
             }
             this.MessageLanguages = languageRepository.GetLanguages(messageId, contentLanguage);
 
-            this.CurrentLanguageToolTip = string.Empty;
+            typeof(Sitecore.EmailCampaign.Controls.LanguageSwitcher.LanguageSwitcherViewModel)
+                .GetMethod("set_CurrentLanguageToolTip", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(this, new object[] { string.Empty });
 
-            this.CurrentLanguage = this.MessageLanguages.SingleOrDefault(x => x.IsDefault);
+            typeof(Sitecore.EmailCampaign.Controls.LanguageSwitcher.LanguageSwitcherViewModel)
+                .GetMethod("set_CurrentLanguage", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(this, new object[] { this.MessageLanguages.SingleOrDefault(x => x.IsDefault) });
+
             if (this.CurrentLanguage != null)
             {
-                this.CurrentLanguageToolTip = this.CurrentLanguage.DisplayName;
+                typeof(Sitecore.EmailCampaign.Controls.LanguageSwitcher.LanguageSwitcherViewModel)
+                .GetMethod("set_CurrentLanguageToolTip", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(this, new object[] { this.CurrentLanguage.DisplayName });
                 this.UserControl.Attributes.Add("data-sc-defaultLanguage", this.CurrentLanguage.IsoCode);
                 this.UserControl.Attributes.Add("data-sc-defaultLanguageToolTip", this.CurrentLanguageToolTip);
+
                 var myCookie = new HttpCookie("messageLanguage", this.CurrentLanguage.IsoCode);
                 myCookie.Expires = DateTime.Now.AddDays(1);
                 HttpContext.Current.Response.Cookies.Add(myCookie);
@@ -98,27 +105,32 @@
         private void GetFormattedLanguages()
         {
             var allLanguages = new Util().GetDb().Languages;
-            this.FormattedLanguages = allLanguages.Select(l =>
-            {
-                var messageLangauge = this.MessageLanguages.FirstOrDefault(messageLang => messageLang.IsoCode == l.Name);
-                if (messageLangauge != null)
+
+            this.FormattedLanguages = allLanguages
+                .Where(l => new Util().GetDb().GetItem(l.Origin.ItemId) != null && AuthorizationManager.IsAllowed(new Util().GetDb().GetItem(l.Origin.ItemId), AccessRight.LanguageRead, Context.User))
+                .Select(l =>
                 {
+                    var messageLangauge = this.MessageLanguages.FirstOrDefault(messageLang => messageLang.IsoCode == l.Name);
+
+                    if (messageLangauge != null)
+                    {
+                        return new LanguageInfo
+                        {
+                            HasVersion = messageLangauge.HasVersion,
+                            IsDefault = messageLangauge.IsDefault,
+                            IsoCode = messageLangauge.IsoCode,
+                            DisplayName = messageLangauge.DisplayName
+                        };
+                    }
+
                     return new LanguageInfo
                     {
-                        HasVersion = messageLangauge.HasVersion,
-                        IsDefault = messageLangauge.IsDefault,
-                        IsoCode = messageLangauge.IsoCode,
-                        DisplayName = messageLangauge.DisplayName
+                        HasVersion = false,
+                        IsDefault = false,
+                        IsoCode = l.Name,
+                        DisplayName = l.CultureInfo.DisplayName
                     };
-                }
-                return new LanguageInfo
-                {
-                    HasVersion = false,
-                    IsDefault = false,
-                    IsoCode = l.Name,
-                    DisplayName = l.CultureInfo.DisplayName
-                };
-            }).ToList();
+                }).ToList();
         }
 
         private void RenderLanguageList()
@@ -127,6 +139,7 @@
               "/sitecore/shell/client/Applications/ECM/EmailCampaign.Controls/LanguageSwitcher/LanguageList.cshtml",
               "DropDownButton", this);
         }
+
         private void UpdateCurrentUserControl()
         {
             UserControl = this._sitecoreViewModelHelper.GetUserControl(Html);
@@ -134,6 +147,10 @@
             UserControl.Requires.Css("ecm", "LanguageSwitcher.css");
             UserControl.Class = "sc-ecm-language sc-actionpanel";
             UserControl.Attributes["data-bind"] = "visible: isVisible, isOpen: false";
+
+            typeof(Sitecore.EmailCampaign.Controls.LanguageSwitcher.LanguageSwitcherViewModel)
+                .GetMethod("set_UserControl", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(this, new object[] { UserControl });
         }
     }
 }
